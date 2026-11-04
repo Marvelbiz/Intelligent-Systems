@@ -25,12 +25,26 @@ export async function generateStaticParams() {
     console.error("Error fetching posts for generateStaticParams:", error);
   }
 
-  // Fallback slug to ensure generateStaticParams never returns an empty array
+  // Fallback to satisfy Cache Components build-time validation
   return [{ slug: "welcome" }];
 }
 
 export default async function SinglePostPage({ params }: PostPageProps) {
   const { slug } = await params;
+  
+  // Handle placeholder gracefully if rendered
+  if (slug === "welcome") {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+        <h1 className="text-3xl font-bold text-[#00205B]">Welcome to our Blog</h1>
+        <p className="text-slate-600 mt-4">No posts published yet. Check back soon!</p>
+        <Link href="/blogs" className="inline-block mt-6 text-[#D4AF37] font-semibold">
+          Back to all blogs
+        </Link>
+      </div>
+    );
+  }
+
   const post = await client.fetch(POST_BY_SLUG_QUERY, { slug });
 
   if (!post) {

@@ -14,10 +14,19 @@ interface PostPageProps {
 
 // Generate static parameters for existing slugs during build
 export async function generateStaticParams() {
-  const posts = await client.fetch(POSTS_QUERY);
-  return posts.map((post: { slug: { current: string } }) => ({
-    slug: post.slug.current,
-  }));
+  try {
+    const posts = await client.fetch(POSTS_QUERY);
+    if (posts && posts.length > 0) {
+      return posts.map((post: { slug: { current: string } }) => ({
+        slug: post.slug.current,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching posts for generateStaticParams:", error);
+  }
+
+  // Fallback slug to ensure generateStaticParams never returns an empty array
+  return [{ slug: "welcome" }];
 }
 
 export default async function SinglePostPage({ params }: PostPageProps) {

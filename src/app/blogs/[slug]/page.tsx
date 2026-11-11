@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,7 +13,6 @@ interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Allow Next.js to dynamically render new slugs published after build time
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
@@ -32,6 +32,7 @@ export async function generateStaticParams() {
 
 async function getPostBySlug(slug: string) {
   "use cache";
+  cacheLife("seconds");
   return await client.fetch(POST_BY_SLUG_QUERY, { slug });
 }
 

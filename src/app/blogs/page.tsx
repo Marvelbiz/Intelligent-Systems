@@ -1,12 +1,12 @@
-import Link from "next/link";
+import { cacheLife } from "next/cache";
 import { client } from "@/sanity/lib/client";
 import { POSTS_QUERY } from "@/sanity/lib/queries";
+import Link from "next/link";
 import { BlogSearchFilter } from "@/components/blogs/BlogSearchFilter";
-import { BookOpen } from "lucide-react";
 
-// Cached helper function for Sanity data fetching
 async function getPosts() {
   "use cache";
+  cacheLife("seconds");
   return await client.fetch(POSTS_QUERY);
 }
 
@@ -14,31 +14,32 @@ export default async function BlogsPage() {
   const posts = await getPosts();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-      
-      {/* Page Header */}
-      <div className="border-b border-gray-200 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-extrabold text-[#00205B] flex items-center space-x-3">
-            <BookOpen className="w-8 h-8 text-[#D4AF37]" />
-            <span>Departmental Blogs & News</span>
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Explore articles, academic research insights, and announcements from OAU Intelligent Systems.
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+      {/* Header */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <span className="inline-block bg-[#00205B] text-[#D4AF37] text-xs font-bold px-3 py-1 rounded uppercase tracking-wider mb-2">
+              Departmental Blogs & News
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#00205B]">
+              Articles, Insights & Announcements
+            </h1>
+          </div>
+          <Link
+            href="/studio"
+            className="inline-flex items-center space-x-2 bg-[#00205B] text-white hover:bg-[#D4AF37] hover:text-[#00205B] font-bold px-5 py-2.5 rounded-xl transition shadow-sm"
+          >
+            <span>Publish Article in Studio</span>
+          </Link>
         </div>
-
-        <Link
-          href="/studio"
-          className="self-start md:self-auto bg-[#00205B] hover:bg-[#00153D] text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow transition"
-        >
-          Publish Article in Studio
-        </Link>
+        <p className="text-slate-600 max-w-2xl">
+          Explore articles, academic research insights, and announcements from OAU Intelligent Systems.
+        </p>
       </div>
 
-      {/* Interactive Client Search & Post Grid */}
+      {/* Interactive Search & Filter Component */}
       <BlogSearchFilter initialPosts={posts} />
-
     </div>
   );
 }

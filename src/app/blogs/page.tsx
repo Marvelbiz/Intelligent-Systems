@@ -1,18 +1,15 @@
-import { cacheLife } from "next/cache";
+import { Suspense } from "react";
 import { client } from "@/sanity/lib/client";
 import { POSTS_QUERY } from "@/sanity/lib/queries";
 import Link from "next/link";
 import { BlogSearchFilter } from "@/components/blogs/BlogSearchFilter";
 
-async function getPosts() {
-  "use cache";
-  cacheLife("seconds");
-  return await client.fetch(POSTS_QUERY);
+async function BlogListContent() {
+  const posts = await client.fetch(POSTS_QUERY, {}, { next: { revalidate: 60 } });
+  return <BlogSearchFilter initialPosts={posts} />;
 }
 
-export default async function BlogsPage() {
-  const posts = await getPosts();
-
+export default function BlogsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
       {/* Header */}
@@ -38,8 +35,10 @@ export default async function BlogsPage() {
         </p>
       </div>
 
-      {/* Interactive Search & Filter Component */}
-      <BlogSearchFilter initialPosts={posts} />
+      {/* Suspended Async Blog List */}
+      <Suspense fallback={<div className="py-12 text-center text-slate-500">Loading articles...</div>}>
+        <BlogListContent />
+      </Suspense>
     </div>
   );
 }

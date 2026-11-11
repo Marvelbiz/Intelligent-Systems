@@ -12,7 +12,9 @@ interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Generate static parameters for existing slugs during build
+// Allow Next.js to dynamically render new slugs published after build time
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
   try {
     const posts = await client.fetch(POSTS_QUERY);
@@ -25,27 +27,17 @@ export async function generateStaticParams() {
     console.error("Error fetching posts for generateStaticParams:", error);
   }
 
-  // Fallback to satisfy Cache Components build-time validation
   return [{ slug: "welcome" }];
+}
+
+async function getPostBySlug(slug: string) {
+  "use cache";
+  return await client.fetch(POST_BY_SLUG_QUERY, { slug });
 }
 
 export default async function SinglePostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  
-  // Handle placeholder gracefully if rendered
-  if (slug === "welcome") {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-3xl font-bold text-[#00205B]">Welcome to our Blog</h1>
-        <p className="text-slate-600 mt-4">No posts published yet. Check back soon!</p>
-        <Link href="/blogs" className="inline-block mt-6 text-[#D4AF37] font-semibold">
-          Back to all blogs
-        </Link>
-      </div>
-    );
-  }
-
-  const post = await client.fetch(POST_BY_SLUG_QUERY, { slug });
+  const post = await getPostBySlug(slug);
 
   if (!post) {
     notFound();
@@ -53,8 +45,6 @@ export default async function SinglePostPage({ params }: PostPageProps) {
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-      
-      {/* Back Button */}
       <Link
         href="/blogs"
         className="inline-flex items-center space-x-2 text-sm font-semibold text-[#00205B] hover:text-[#D4AF37] transition"
@@ -63,7 +53,6 @@ export default async function SinglePostPage({ params }: PostPageProps) {
         <span>Back to all blogs</span>
       </Link>
 
-      {/* Post Meta Header */}
       <div className="space-y-4">
         <span className="inline-block bg-[#D4AF37] text-[#00205B] text-xs font-bold px-3 py-1 rounded uppercase tracking-wider">
           {post.category || "General"}
@@ -75,7 +64,9 @@ export default async function SinglePostPage({ params }: PostPageProps) {
         <div className="flex items-center space-x-6 text-sm text-slate-600 border-y border-slate-200 py-3">
           <div className="flex items-center space-x-2">
             <User className="w-4 h-4 text-[#D4AF37]" />
-            <span className="font-semibold text-slate-900">{post.author?.name || "OAU Intelligent Systems"}</span>
+            <span className="font-semibold text-slate-900">
+              {post.author?.name || "OAU Intelligent Systems"}
+            </span>
           </div>
           <div className="flex items-center space-x-2">
             <Calendar className="w-4 h-4" />
@@ -92,7 +83,6 @@ export default async function SinglePostPage({ params }: PostPageProps) {
         </div>
       </div>
 
-      {/* Cover Image */}
       {post.mainImage && (
         <div className="relative h-96 w-full rounded-2xl overflow-hidden shadow-md">
           <Image
@@ -105,11 +95,11 @@ export default async function SinglePostPage({ params }: PostPageProps) {
         </div>
       )}
 
-      {/* Body Content */}
       <div className="prose prose-slate lg:prose-lg max-w-none">
-        {post.body && <PortableText value={post.body} components={RichTextComponents} />}
+        {post.body && (
+          <PortableText value={post.body} components={RichTextComponents} />
+        )}
       </div>
-
     </article>
   );
 }

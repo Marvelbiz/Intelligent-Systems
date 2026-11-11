@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { LayoutWrapper } from "@/components/layout/layoutWrapper";
 
 export const metadata: Metadata = {
   title: "Department of Intelligent Systems | Obafemi Awolowo University",
-  description: "Official portal for the Department of Intelligent Systems at OAU Ile-Ife. AI Research, Academic Blogs, and Innovation.",
+  description:
+    "Official portal for the Department of Intelligent Systems at OAU Ile-Ife. AI Research, Academic Blogs, and Innovation.",
 };
 
 export default function RootLayout({
@@ -15,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <Suspense fallback={<div className="min-h-screen">{children}</div>}>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </Suspense>
       </body>
     </html>
   );

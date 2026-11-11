@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { layoutWrapper } from "@/components/layout/LayoutWrapper";
+import { LayoutWrapper } from "@/components/layout/layoutWrapper";
 
 export const metadata: Metadata = {
   title: "Department of Intelligent Systems | Obafemi Awolowo University",
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <layoutWrapper>{children}</layoutWrapper>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

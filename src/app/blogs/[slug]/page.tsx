@@ -13,8 +13,6 @@ interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const dynamicParams = true;
-
 export async function generateStaticParams() {
   try {
     const posts = await client.fetch(POSTS_QUERY);

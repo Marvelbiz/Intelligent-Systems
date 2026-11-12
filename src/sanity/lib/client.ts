@@ -1,9 +1,8 @@
-import { createClient } from "next-sanity";
-import { apiVersion, dataset, projectId } from "../env";
+import { createClient } from 'next-sanity'
 
 export const client = createClient({
-  projectId,
-  dataset,
-  apiVersion,
-  useCdn: false, // Set to false so newly published Sanity documents are fetched immediately
-});
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+  apiVersion: '2024-03-19',
+  useCdn: false, // Disables Sanity CDN so published updates appear instantly
+})

@@ -1,9 +1,10 @@
+import { Suspense } from "react";
 import { cacheLife } from "next/cache";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { client } from "@/sanity/lib/client";
-import { POST_BY_SLUG_QUERY } from "@/sanity/lib/queries";
+import { POST_BY_SLUG_QUERY, POSTS_QUERY } from "@/sanity/lib/queries";
 import { urlFor } from "@/sanity/lib/image";
 import { PortableText } from "@portabletext/react";
 import { RichTextComponents } from "@/components/sanity/RichText";
@@ -13,14 +14,29 @@ interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export async function generateStaticParams() {
+  try {
+    const posts = await client.fetch(POSTS_QUERY);
+    if (posts && posts.length > 0) {
+      return posts.map((post: { slug: { current: string } }) => ({
+        slug: post.slug.current,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching posts for generateStaticParams:", error);
+  }
+
+  return [{ slug: "welcome" }];
+}
+
 async function getPostBySlug(slug: string) {
   "use cache";
   cacheLife("seconds");
   return await client.fetch(POST_BY_SLUG_QUERY, { slug });
 }
 
-export default async function SinglePostPage({ params }: PostPageProps) {
-  const { slug } = await params;
+// 1. Inner component that safely handles params and data fetching
+async function BlogPostContent({ slug }: { slug: string }) {
   const post = await getPostBySlug(slug);
 
   if (!post) {
@@ -85,5 +101,16 @@ export default async function SinglePostPage({ params }: PostPageProps) {
         )}
       </div>
     </article>
+  );
+}
+
+// 2. Main page wrapper with Suspense
+export default async function SinglePostPage({ params }: PostPageProps) {
+  const { slug } = await params;
+
+  return (
+    <Suspense fallback={<div className="text-center py-20 text-slate-500">Loading article...</div>}>
+      <BlogPostContent slug={slug} />
+    </Suspense>
   );
 }

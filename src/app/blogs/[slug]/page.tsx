@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { client } from "@/sanity/lib/client";
-import { POST_BY_SLUG_QUERY, POSTS_QUERY } from "@/sanity/lib/queries";
+import { POST_BY_SLUG_QUERY } from "@/sanity/lib/queries";
 import { urlFor } from "@/sanity/lib/image";
 import { PortableText } from "@portabletext/react";
 import { RichTextComponents } from "@/components/sanity/RichText";
@@ -11,21 +11,6 @@ import { ArrowLeft, Calendar, User } from "lucide-react";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  try {
-    const posts = await client.fetch(POSTS_QUERY);
-    if (posts && posts.length > 0) {
-      return posts.map((post: { slug: { current: string } }) => ({
-        slug: post.slug.current,
-      }));
-    }
-  } catch (error) {
-    console.error("Error fetching posts for generateStaticParams:", error);
-  }
-
-  return [{ slug: "welcome" }];
 }
 
 async function getPostBySlug(slug: string) {

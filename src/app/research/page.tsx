@@ -1,4 +1,5 @@
-import { cacheLife } from "next/cache";
+export const dynamic = 'force-dynamic';
+
 import { client } from "@/sanity/lib/client";
 import { PROJECTS_QUERY } from "@/sanity/lib/queries";
 import Link from "next/link";
@@ -7,8 +8,6 @@ import { urlFor } from "@/sanity/lib/image";
 import { FlaskConical, ArrowRight } from "lucide-react";
 
 async function getProjects() {
-  "use cache";
-  cacheLife("seconds");
   return await client.fetch(PROJECTS_QUERY);
 }
 
